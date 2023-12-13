@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Translate text with Azure AI Services.">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>Translate text with Azure AI Services</title>
+    <style>
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    
+        #progress-svg {
+            animation: rotate 2s linear infinite;
+            width: 50px;
+            height: 50px;
+        }
+      </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Text translation with Azure AI Services</h1>
+        <p>This web app is hosted on Azure App Service and uses ML capabilities in Azure AI Services for text translation.</p>
+        <p>Learn more about <a href="https://learn.microsoft.com/en-us/azure/ai-services/">Azure AI Services</a> and <a href="https://azure.microsoft.com/services/app-service/">Azure App Service</a></p>
+         <!-- Custom styles -->
+    <style>
+        .container {
+            margin-top: 20px; /* Adjust the value to your preference */
+        }
+    </style>
+
+        <!-- Selection option -->
+        <div class="form-group">
+            <label><strong>Select translation type:</strong></label><br>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="translationType" id="textTranslation" value="text" checked>
+                <label class="form-check-label" for="textTranslation">Text Translation</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="translationType" id="documentTranslation" value="document">
+                <label class="form-check-label" for="documentTranslation">Document Translation</label>
+            </div>
+        </div>
+
+        <!-- Text translation form -->
+        <div id="text-translation-form">
+            <div class="row">
+                <div class="col">
+                    <form>
+                        <!-- Select "From" language here. -->
+                        <div class="form-group">
+                            <label for="select-from-language"><strong>Translate from:</strong></label>
+                            <select class="form-control" id="select-from-language">
+                                <!-- Add language options here -->
+                                <option value="default">Auto Detect</option>
+                                <option value="en">English</option>
+                                <option value="nl">Dutch</option>
+                                <option value="fr">French</option>
+                                <option value="de">German</option>
+                            </select>
+                        </div>
+
+                        <!-- Enter text to translate. -->
+                        <div class="form-group">
+                            <label for="text-to-translate"><strong>Enter the text you'd like to translate:</strong></label>
+                            <textarea class="form-control" id="text-to-translate" rows="5"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mb-2" id="translate">Translate text</button><br>
+                        <div id="detected-language" style="display: none">
+                            <strong>Detected language:</strong> <span id="detected-language-result"></span><br />
+                            <strong>Detection confidence:</strong> <span id="confidence"></span><br /><br />
+                        </div>
+                    </form>
+                </div>
+                <div class="col">
+                    <form>
+                        <!-- Select output language here. -->
+                        <div class="form-group">
+                            <label for="select-language"><strong>Translate to:</strong></label>
+                            <select class="form-control" id="select-language">
+                                <option value="en">English</option>
+                                <option value="nl">Dutch</option>
+                                <option value="fr">French</option>
+                                <option value="de">German</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="translator-text-response">
+                            <label for="translation-result"><strong>Translated text:</strong></label>
+                            <textarea readonly class="form-control" id="translation-result" rows="5"></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document translation form (hidden by default) -->
+        <div id="document-translation-form" style="display: none;">
+            <div class="row">
+                <div class="col">
+                    <form>
+                        <!-- Select "To" language here. -->
+                        <div class="form-group">
+                            <label for="select-from-language"><strong>Translate from:</strong></label>
+                            <select class="form-control" id="select-from-language-document">
+                                <option value="default">Auto Detect</option>
+                                <option value="en">English</option>
+                                <option value="nl">Dutch</option>
+                                <option value="fr">French</option>
+                                <option value="de">German</option>
+                            </select>
+                        </div>
+
+                        <!-- Upload document -->
+                        <div class="form-group">
+                            <label for="document">Choose a document to translate:</label>
+                            <input type="file" class="form-control-file" id="document" accept=".xls,.xlsx,.doc,.docx,.pdf,.csv,.txt">
+                            <p class="text-muted">Supported file types: .xls, .xlsx, .doc, .docx, .pdf, .csv, .txt</p>
+                        </div>
+                        
+                        
+
+                        <style>
+                            @keyframes rotate {
+                                0% { transform: rotate(0deg); }
+                                100% { transform: rotate(1turn); }
+                            }
+
+                            #progress-svg {
+                                animation: rotate 2s linear infinite;
+                                width: 80px;
+                                height: 80px;
+                                display: block;
+                                margin-right: auto;
+                            }
+
+                            #progress-circle {
+                                stroke-dasharray: 251.2;
+                                stroke-dashoffset: 50.8;
+                                stroke: gray;
+                                stroke-linecap: round;
+                                stroke-width: 5;
+                                fill: none;
+                                transform-origin: center;
+                                transform: rotate(-90deg);
+                                animation: rotate 1.4s ease-in-out infinite;
+                            }
+                        </style>
+
+                        <!-- Circular Progress bar -->
+                        <div id="progress-bar" style="display: none;">
+                            <svg id="progress-svg" viewBox="0 0 100 100">
+                                <circle id="progress-circle" cx="50" cy="50" r="40"></circle>
+                            </svg>
+                        </div>
+
+                        <!-- Translate button -->
+                        <button type="button" class="btn btn-primary" id="translate-document">Translate document</button>
+
+                        <!-- Display translation status -->
+                        <div id="translation-status" style="display: none">
+                            <strong>Translation Status:</strong> <span id="status-text"></span>
+                        </div>
+                    </form>
+                </div>
+                <div class="col">
+                    <!-- ... (similar to text translation) -->
+                    <form>
+                        <!-- Select "To" language here. -->
+                        <div class="form-group">
+                            <label for="select-language"><strong>Translate to:</strong></label>
+                            <select class="form-control" id="select-to-language-document">
+                                <option value="en">English</option>
+                                <option value="nl">Dutch</option>
+                                <option value="fr">French</option>
+                                <option value="de">German</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Required JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='main.js') }}"></script>
+
+  </body>
+</html>
